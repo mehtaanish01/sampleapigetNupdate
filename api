@@ -1,0 +1,82 @@
+import okhttp3.*;
+import org.json.JSONObject;
+import org.testng.annotations.Test;
+
+
+import java.io.IOException;
+
+import static okhttp3.RequestBody.*;
+import static org.testng.Assert.*;
+
+
+public class apisample {
+
+    private final OkHttpClient client = new OkHttpClient();
+
+    @Test
+    public void getapi() throws IOException {
+
+        Request request = new Request.Builder()
+                .url("https://fake-json-api.mock.beeceptor.com/users")
+                .get()
+                .build();
+
+
+        try (Response response = client.newCall(request).execute()) {
+         
+            assertEquals(200, response.code(), "status code 200");
+            assertNotNull(response.body(), "Response body resturns valid value");
+
+
+            String responseBody = response.body().string();
+            assertFalse(responseBody.isEmpty(), "Response body should not be empty");
+
+        }
+    }
+
+
+
+
+        @Test
+        public void updateapi() throws IOException {
+
+
+
+            JSONObject json = new JSONObject();
+            json.put("car", "nexon");
+            json.put("brand", "tata");
+            json.put("owner", "rakesh");
+
+
+            RequestBody requestBody = create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+                        );
+
+
+            Request request = new Request.Builder()
+                    .url("https://fake-json-api.mock.beeceptor.com/users")
+                    .post(requestBody)
+                    .build();
+
+
+            try (Response response = client.newCall(request).execute()) {
+
+                assertEquals(201, response.code(), "Expected status code 201 (Created)");
+                assertNotNull(response.body(), "Response body should not be null");
+
+
+                String responseBody = response.body().string();
+                assertFalse(responseBody.isEmpty(), "Response body should not be empty");
+
+
+                JSONObject responseJson = new JSONObject(responseBody);
+
+
+                assertEquals("John Doe", responseJson.getString("name"), "User name should match");
+                assertEquals(30, responseJson.getInt("age"), "User age should match");
+                assertEquals("johndoe@example.com", responseJson.getString("email"), "User email should match");
+            }
+        }
+    }
+
